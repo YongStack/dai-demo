@@ -226,22 +226,34 @@ func TestE2E_CreateBucket_InvalidQuota(t *testing.T) {
 	server, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	tests := []int64{-1, 0}
+	// quota_capacity = -1: 通过 Gin binding 校验后由 service 层拒绝
+	req := &model.CreateBucketRequest{
+		Bucket:        "valid-bucket",
+		QuotaCapacity: -1,
+	}
+	resp := doJSON(t, server, "POST", "/api/buckets", req)
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected 400 for quota -1, got %d", resp.StatusCode)
+	}
+	var errResp model.ErrorResponse
+	parseJSON(t, resp, &errResp)
+	if errResp.Error != "invalid quota limit" {
+		t.Errorf("expected 'invalid quota limit', got %q", errResp.Error)
+	}
 
-	for _, quota := range tests {
-		req := &model.CreateBucketRequest{
-			Bucket:        "valid-bucket",
-			QuotaCapacity: quota,
-		}
-		resp := doJSON(t, server, "POST", "/api/buckets", req)
-		if resp.StatusCode != http.StatusBadRequest {
-			t.Errorf("expected 400 for quota %d, got %d", quota, resp.StatusCode)
-		}
-		var errResp model.ErrorResponse
-		parseJSON(t, resp, &errResp)
-		if errResp.Error != "invalid quota limit" {
-			t.Errorf("expected 'invalid quota limit', got %q", errResp.Error)
-		}
+	// quota_capacity = 0: Gin binding:"required" 将零值视为缺失，返回 "invalid request body"
+	req2 := &model.CreateBucketRequest{
+		Bucket:        "valid-bucket-2",
+		QuotaCapacity: 0,
+	}
+	resp2 := doJSON(t, server, "POST", "/api/buckets", req2)
+	if resp2.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected 400 for quota 0, got %d", resp2.StatusCode)
+	}
+	var errResp2 model.ErrorResponse
+	parseJSON(t, resp2, &errResp2)
+	if errResp2.Error != "invalid request body" {
+		t.Errorf("expected 'invalid request body' for quota 0, got %q", errResp2.Error)
 	}
 }
 
