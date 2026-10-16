@@ -1,0 +1,405 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    color: #333;
+}
+
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 24px 32px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.header .subtitle {
+    font-size: 14px;
+    opacity: 0.85;
+}
+
+.main-content {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.panel-left {
+    flex: 0 0 360px;
+}
+
+.panel-right {
+    flex: 1;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.panel-header h2 {
+    font-size: 18px;
+    color: #1a1a2e;
+}
+
+/* 创建桶表单 */
+.create-form {
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.create-form h3 {
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: #555;
+}
+
+.form-row {
+    margin-bottom: 12px;
+}
+
+.form-row label {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.form-row input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-row input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102,126,234,0.15);
+}
+
+.form-row-2col {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row-2col > div {
+    flex: 1;
+}
+
+.form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* 按钮 */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #555;
+}
+
+.btn-secondary:hover {
+    background: #d0d0d0;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* 桶列表 */
+.bucket-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.bucket-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.bucket-item:hover {
+    background: #f5f7ff;
+}
+
+.bucket-item.active {
+    background: #e8edff;
+    border-left: 3px solid #667eea;
+}
+
+.bucket-item-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.bucket-item-stats {
+    font-size: 12px;
+    color: #999;
+    display: flex;
+    gap: 12px;
+}
+
+/* 详情面板 */
+.detail-empty {
+    padding: 80px 20px;
+    text-align: center;
+    color: #aaa;
+}
+
+.detail-content {
+    padding: 20px;
+}
+
+.quota-card-group {
+    margin-bottom: 24px;
+}
+
+.group-title {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.quota-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.quota-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.quota-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.quota-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+}
+
+.quota-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.low {
+    background: #2ecc71;
+}
+
+.progress-fill.mid {
+    background: #f39c12;
+}
+
+.progress-fill.high {
+    background: #e74c3c;
+}
+
+.quota-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.stat-item {
+    flex: 1;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 上传区域 */
+.upload-area {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.upload-area input[type="file"] {
+    flex: 1;
+}
+
+.upload-hint {
+    font-size: 13px;
+    color: #999;
+}
+
+/* 对象列表 */
+.object-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.object-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.object-item-info {
+    flex: 1;
+}
+
+.object-item-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.object-item-meta {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 2px;
+}
+
+.object-item-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-icon {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 9999;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+.toast.success {
+    background: #2ecc71;
+}
+
+.toast.error {
+    background: #e74c3c;
+}
+
+.empty-hint {
+    text-align: center;
+    color: #ccc;
+    padding: 24px;
+    font-size: 14px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    .panel-left {
+        flex: none;
+    }
+    .quota-card-grid {
+        grid-template-columns: 1fr;
+    }
+}

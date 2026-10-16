@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>对象存储 Quota 管控平台</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+    <header class="header">
+        <h1>📦 对象存储 Quota 管控平台</h1>
+        <p class="subtitle">容量 · 读写带宽 · 读写 IOPS — 资源展示与配额管控 Demo</p>
+    </header>
+
+    <main class="main-content">
+        <!-- 左侧：桶列表 -->
+        <section class="panel panel-left">
+            <div class="panel-header">
+                <h2>存储桶列表</h2>
+                <button class="btn btn-primary btn-sm" id="btn-create-toggle">+ 创建桶</button>
+            </div>
+
+            <!-- 创建桶表单（折叠） -->
+            <div class="create-form" id="create-form" style="display:none;">
+                <h3>创建新存储桶</h3>
+                <div class="form-row">
+                    <label>桶名</label>
+                    <input type="text" id="new-bucket-name" placeholder="my-bucket (小写字母/数字/连字符, 3-63字符)">
+                </div>
+                <div class="form-row">
+                    <label>容量配额 (GB)</label>
+                    <input type="number" id="new-quota-capacity" placeholder="1" step="0.1" min="0.1">
+                </div>
+                <div class="form-row form-row-2col">
+                    <div>
+                        <label>读带宽配额 (MB/s)</label>
+                        <input type="number" id="new-quota-readbps" placeholder="0=不限" min="0" value="0">
+                    </div>
+                    <div>
+                        <label>写带宽配额 (MB/s)</label>
+                        <input type="number" id="new-quota-writebps" placeholder="0=不限" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row form-row-2col">
+                    <div>
+                        <label>读 IOPS 配额</label>
+                        <input type="number" id="new-quota-readiops" placeholder="0=不限" min="0" value="0">
+                    </div>
+                    <div>
+                        <label>写 IOPS 配额</label>
+                        <input type="number" id="new-quota-writeiops" placeholder="0=不限" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="btn-create-bucket">创建</button>
+                    <button class="btn btn-secondary" id="btn-cancel-create">取消</button>
+                </div>
+            </div>
+
+            <div class="bucket-list" id="bucket-list">
+                <p class="empty-hint">暂无存储桶，点击「创建桶」开始</p>
+            </div>
+        </section>
+
+        <!-- 右侧：配额详情 -->
+        <section class="panel panel-right" id="detail-panel">
+            <div class="panel-header">
+                <h2 id="detail-title">配额详情</h2>
+                <div id="detail-actions" style="display:none;">
+                    <button class="btn btn-danger btn-sm" id="btn-delete-bucket">删除桶</button>
+                </div>
+            </div>
+            <div class="detail-empty" id="detail-empty">
+                <p>请从左侧选择一个存储桶查看详情</p>
+            </div>
+            <div class="detail-content" id="detail-content" style="display:none;">
+                <!-- 容量配额卡片 -->
+                <div class="quota-card-group">
+                    <h3 class="group-title">💾 容量配额</h3>
+                    <div class="quota-card">
+                        <div class="quota-card-header">
+                            <span class="quota-label">已用 / 总量</span>
+                            <span class="quota-value" id="cap-used-total">— / —</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="cap-progress" style="width:0%"></div>
+                        </div>
+                        <div class="quota-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">剩余</span>
+                                <span class="stat-value" id="cap-remaining">—</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">使用率</span>
+                                <span class="stat-value" id="cap-percent">—</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">对象数</span>
+                                <span class="stat-value" id="cap-object-count">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 读写带宽配额 -->
+                <div class="quota-card-group">
+                    <h3 class="group-title">📊 读写带宽配额</h3>
+                    <div class="quota-card-grid">
+                        <div class="quota-card">
+                            <div class="quota-card-header">
+                                <span class="quota-label">读带宽 (BPS)</span>
+                            </div>
+                            <div class="quota-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">配额上限</span>
+                                    <span class="stat-value" id="bps-read-quota">—</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">当前使用</span>
+                                    <span class="stat-value" id="bps-read-used">—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quota-card">
+                            <div class="quota-card-header">
+                                <span class="quota-label">写带宽 (BPS)</span>
+                            </div>
+                            <div class="quota-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">配额上限</span>
+                                    <span class="stat-value" id="bps-write-quota">—</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">当前使用</span>
+                                    <span class="stat-value" id="bps-write-used">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IOPS 配额 -->
+                <div class="quota-card-group">
+                    <h3 class="group-title">⚡ 读写 IOPS 配额</h3>
+                    <div class="quota-card-grid">
+                        <div class="quota-card">
+                            <div class="quota-card-header">
+                                <span class="quota-label">读 IOPS</span>
+                            </div>
+                            <div class="quota-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">配额上限</span>
+                                    <span class="stat-value" id="iops-read-quota">—</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">当前使用</span>
+                                    <span class="stat-value" id="iops-read-used">—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quota-card">
+                            <div class="quota-card-header">
+                                <span class="quota-label">写 IOPS</span>
+                            </div>
+                            <div class="quota-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">配额上限</span>
+                                    <span class="stat-value" id="iops-write-quota">—</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">当前使用</span>
+                                    <span class="stat-value" id="iops-write-used">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 对象管理 -->
+                <div class="quota-card-group">
+                    <h3 class="group-title">📁 对象管理</h3>
+                    <div class="upload-area">
+                        <input type="file" id="upload-file-input">
+                        <button class="btn btn-primary btn-sm" id="btn-upload">上传文件</button>
+                        <span class="upload-hint" id="upload-hint"></span>
+                    </div>
+                    <div class="object-list" id="object-list">
+                        <p class="empty-hint">暂无对象</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast 通知 -->
+    <div class="toast" id="toast"></div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
