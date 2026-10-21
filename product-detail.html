@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>商品详情 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="container" style="padding-top:var(--gap-xl);padding-bottom:var(--gap-4xl);">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom:var(--gap-xl);font-size:var(--fs-small);color:var(--muted);">
+      <a href="index.html" style="color:var(--muted);">首页</a> / 
+      <a href="products.html" style="color:var(--muted);">全部商品</a> / 
+      <span id="breadcrumbCat" style="color:var(--fg);"></span>
+    </div>
+
+    <div class="grid grid-2" id="detailContainer" style="gap:var(--gap-2xl);"></div>
+  </div>
+
+  <!-- Related products -->
+  <div class="container section" style="border-top:1px solid var(--border);">
+    <h2 style="font-size:var(--fs-h2);font-weight:400;margin-bottom:var(--gap-xl);">相关推荐</h2>
+    <div class="grid grid-4" id="relatedProducts"></div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/app.js"></script>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var productId = parseInt(params.get('id') || '1');
+    var product = TennisPro.PRODUCTS.find(function(p){return p.id===productId;}) || TennisPro.PRODUCTS[0];
+    var cat = TennisPro.CATEGORIES.find(function(c){return c.id===product.cat;});
+    var isOutOfStock = product.stock === 0;
+    var selectedSpec = '';
+    var currentImgIndex = 0;
+
+    // Spec options based on category
+    var specOptions = {
+      rackets: ['270g', '285g', '300g', '315g'],
+      shoes: ['39', '40', '41', '42', '43', '44'],
+      apparel: ['S', 'M', 'L', 'XL', 'XXL'],
+      balls: ['4球装', '24球装'],
+      bags: ['6支装', '12支装'],
+      accessories: ['标准款']
+    };
+    var specs = specOptions[product.cat] || ['标准'];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.title = product.name + ' · TennisPro';
+      document.getElementById('breadcrumbCat').textContent = cat ? cat.name : '';
+
+      var container = document.getElementById('detailContainer');
+
+      // Image gallery
+      var galleryHTML = '<div style="position:relative;">' +
+        '<div class="product-card-img" style="aspect-ratio:1;border-radius:var(--radius-xl);border:1px solid var(--border);overflow:hidden;position:relative;" id="mainImg">' +
+          '<span class="ph" style="font-size:120px;">' + (cat ? cat.icon : '🎾') + '</span>' +
+        '</div>' +
+        '<div class="row" style="gap:12px;margin-top:16px;">';
+      for (var i = 0; i < product.imgs; i++) {
+        galleryHTML += '<div class="product-card-img" style="width:80px;height:80px;border-radius:var(--radius);cursor:pointer;border:2px solid ' + (i===0?'var(--accent)':'var(--border)') + ';" onclick="selectImg(' + i + ')" data-idx="' + i + '"><span class="ph" style="font-size:32px;">' + (cat?cat.icon:'🎾') + '</span></div>';
+      }
+      galleryHTML += '</div></div>';
+
+      // Info section
+      var infoHTML = '<div>' +
+        (product.tag ? '<span class="product-tag" style="position:static;display:inline-block;margin-bottom:16px;">' + product.tag + '</span>' : '') +
+        '<h1 style="font-size:var(--fs-h2);font-weight:500;margin-bottom:16px;">' + product.name + '</h1>' +
+        '<div class="row" style="align-items:baseline;gap:12px;margin-bottom:24px;">' +
+          '<span style="font-family:var(--font-display);font-size:36px;font-weight:600;color:var(--accent);">¥' + product.price + '</span>' +
+          (product.originalPrice ? '<span style="font-size:var(--fs-body);color:var(--muted-2);text-decoration:line-through;">¥' + product.originalPrice + '</span>' : '') +
+          '<span style="font-size:var(--fs-small);color:var(--success);">省¥' + (product.originalPrice - product.price) + '</span>' +
+        '</div>' +
+        '<div style="padding:16px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;">' +
+          '<div><div style="font-size:var(--fs-micro);color:var(--muted);">销量</div><div style="font-size:var(--fs-h4);font-weight:600;">' + product.sales + ' 件</div></div>' +
+          '<div><div style="font-size:var(--fs-micro);color:var(--muted);">库存</div><div style="font-size:var(--fs-h4);font-weight:600;color:' + (isOutOfStock?'var(--danger)':'var(--success)') + ';">' + (isOutOfStock?'缺货':product.stock+'件') + '</div></div>' +
+          '<div><div style="font-size:var(--fs-micro);color:var(--muted);">分类</div><div style="font-size:var(--fs-h4);font-weight:600;">' + (cat?cat.name:'') + '</div></div>' +
+        '</div>';
+
+      // Spec selection
+      infoHTML += '<div style="margin-bottom:24px;"><div class="form-label">选择规格</div><div class="row" style="flex-wrap:wrap;gap:12px;" id="specContainer">';
+      specs.forEach(function(s, i) {
+        infoHTML += '<div class="cat-pill' + (i===0?' active':'') + '" onclick="selectSpec(this,\'' + s + '\')" data-spec="' + s + '">' + s + '</div>';
+      });
+      infoHTML += '</div></div>';
+
+      // Quantity
+      infoHTML += '<div style="margin-bottom:32px;"><div class="form-label">数量</div><div class="row" style="gap:0;">' +
+        '<button class="btn btn-outline btn-sm" onclick="changeQty(-1)" style="border-radius:8px 0 0 8px;">-</button>' +
+        '<input type="text" value="1" id="qtyInput" style="width:60px;text-align:center;background:var(--surface);border:1px solid var(--border-light);border-left:none;border-right:none;color:var(--fg);padding:8px 0;font-size:var(--fs-body);outline:none;" />' +
+        '<button class="btn btn-outline btn-sm" onclick="changeQty(1)" style="border-radius:0 8px 8px 0;">+</button>' +
+        '</div></div>';
+
+      // Actions
+      if (isOutOfStock) {
+        infoHTML += '<div style="padding:16px;background:rgba(255,82,82,.1);border:1px solid var(--danger);border-radius:var(--radius);margin-bottom:16px;color:var(--danger);font-size:var(--fs-small);">⚠ 该商品暂时缺货</div>';
+        infoHTML += '<div class="row" style="gap:16px;"><button class="btn btn-primary btn-lg" disabled>加入购物车</button><button class="btn btn-ghost btn-lg" disabled>立即购买</button></div>';
+      } else {
+        infoHTML += '<div class="row" style="gap:16px;">' +
+          '<button class="btn btn-primary btn-lg" onclick="handleAddToCart()">加入购物车</button>' +
+          '<button class="btn btn-accent btn-lg" onclick="handleBuyNow()">立即购买</button>' +
+          '</div>';
+      }
+
+      // Description
+      infoHTML += '<div style="margin-top:var(--gap-xl);padding-top:var(--gap-xl);border-top:1px solid var(--border);">' +
+        '<h3 style="font-size:var(--fs-h4);font-weight:600;margin-bottom:16px;">商品描述</h3>' +
+        '<p style="color:var(--muted);line-height:1.8;font-size:var(--fs-body);">' + product.name + ' 采用高品质材料制造，专为网球运动设计。' + (cat?cat.desc:'') + ' 专业品质，值得信赖。</p>' +
+        '<ul style="margin-top:16px;color:var(--muted);line-height:2;font-size:var(--fs-small);">' +
+        '<li>✓ 品牌正品，官方授权</li>' +
+        '<li>✓ 7天无理由退换</li>' +
+        '<li>✓ 满99元免运费</li>' +
+        '<li>✓ 下单后24小时内发货</li>' +
+        '</ul></div>';
+
+      infoHTML += '</div>';
+
+      container.innerHTML = galleryHTML + infoHTML;
+
+      // Related products
+      var related = TennisPro.PRODUCTS.filter(function(p){return p.cat===product.cat && p.id!==product.id;}).slice(0,4);
+      var relGrid = document.getElementById('relatedProducts');
+      related.forEach(function(p) {
+        var cat2 = TennisPro.CATEGORIES.find(function(c){return c.id===p.cat;});
+        var a = document.createElement('a');
+        a.href = 'product-detail.html?id=' + p.id;
+        a.className = 'product-card';
+        a.innerHTML = '<div class="product-card-img"><span class="ph">' + (cat2?cat2.icon:'🎾') + '</span></div>' +
+          '<div class="product-card-body"><div class="product-card-name">' + p.name + '</div>' +
+          '<div class="product-card-price">¥' + p.price + '</div></div>';
+        relGrid.appendChild(a);
+      });
+    });
+
+    function selectImg(idx) {
+      currentImgIndex = idx;
+      document.querySelectorAll('[data-idx]').forEach(function(el) {
+        el.style.borderColor = parseInt(el.dataset.idx) === idx ? 'var(--accent)' : 'var(--border)';
+      });
+    }
+
+    function selectSpec(el, spec) {
+      selectedSpec = spec;
+      document.querySelectorAll('#specContainer .cat-pill').forEach(function(p){p.classList.remove('active');});
+      el.classList.add('active');
+    }
+
+    function changeQty(delta) {
+      var input = document.getElementById('qtyInput');
+      var qty = parseInt(input.value) + delta;
+      if (qty < 1) qty = 1;
+      input.value = qty;
+    }
+
+    function handleAddToCart() {
+      var qty = parseInt(document.getElementById('qtyInput').value);
+      TennisPro.addToCart(product.id, qty, selectedSpec || specs[0]);
+    }
+
+    function handleBuyNow() {
+      var qty = parseInt(document.getElementById('qtyInput').value);
+      TennisPro.addToCart(product.id, qty, selectedSpec || specs[0]);
+      setTimeout(function() { window.location.href = 'cart.html'; }, 500);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>管理员登录 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container" style="padding-top:var(--gap-4xl);max-width:480px;">
+    <div class="card" style="padding:var(--gap-2xl);">
+      <div style="text-align:center;margin-bottom:var(--gap-xl);">
+        <div class="nav-logo" style="display:inline-block;font-size:32px;">Tennis<span>Pro</span></div>
+        <div style="font-size:var(--fs-micro);color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-top:8px;">管理后台</div>
+        <h1 style="font-size:var(--fs-h3);font-weight:500;margin-top:var(--gap-md);">管理员登录</h1>
+      </div>
+
+      <form onsubmit="return doAdminLogin(event)">
+        <div class="form-group">
+          <label class="form-label">管理员账号</label>
+          <input class="form-input" id="adminUser" placeholder="请输入管理员账号" value="admin" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">密码</label>
+          <input class="form-input" id="adminPass" type="password" placeholder="请输入密码" value="admin123" />
+        </div>
+        <button type="submit" class="btn btn-accent btn-lg" style="width:100%;">登录后台</button>
+      </form>
+
+      <div style="margin-top:var(--gap-lg);text-align:center;">
+        <a href="login.html" style="font-size:var(--fs-micro);color:var(--muted);">← 返回用户登录</a>
+      </div>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+  <script>
+    function doAdminLogin(e) {
+      e.preventDefault();
+      var user = document.getElementById('adminUser').value;
+      var pass = document.getElementById('adminPass').value;
+      if (!user || !pass) { TennisPro.showToast('请输入账号和密码'); return false; }
+      TennisPro.showToast('登录成功');
+      setTimeout(function(){ window.location.href = 'admin-dashboard.html'; }, 800);
+      return false;
+    }
+  </script>
+</body>
+</html>

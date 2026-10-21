@@ -1,0 +1,9 @@
+.git
+node_modules
+*.md
+docs/
+e2e/
+e2e-report/
+playwright.config.js
+playwright-report/
+test-results/

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>订单管理 · TennisPro Admin</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-logo">Tennis<span>Pro</span> <span style="font-size:10px;color:var(--muted-2);">Admin</span></div>
+      <a href="admin-dashboard.html" class="admin-nav-item">📊 <span>数据概览</span></a>
+      <a href="admin-products.html" class="admin-nav-item">🎾 <span>商品管理</span></a>
+      <a href="admin-orders.html" class="admin-nav-item active">📦 <span>订单管理</span></a>
+      <a href="index.html" class="admin-nav-item" style="margin-top:auto;">🏠 <span>返回前台</span></a>
+    </div>
+
+    <div class="admin-main">
+      <div class="admin-header">
+        <h1 style="font-size:var(--fs-h2);font-weight:400;">订单管理</h1>
+      </div>
+
+      <!-- Status tabs -->
+      <div class="row" style="gap:12px;margin-bottom:var(--gap-xl);flex-wrap:wrap;" id="orderTabs">
+        <div class="cat-pill active" data-status="all">全部订单</div>
+        <div class="cat-pill" data-status="pending">待支付</div>
+        <div class="cat-pill" data-status="shipping">待发货</div>
+        <div class="cat-pill" data-status="receiving">待收货</div>
+        <div class="cat-pill" data-status="done">已完成</div>
+        <div class="cat-pill" data-status="cancelled">已取消</div>
+      </div>
+
+      <!-- Orders table -->
+      <div class="admin-card">
+        <table class="data-table">
+          <thead>
+            <tr><th>订单号</th><th>商品</th><th>收货人</th><th>金额</th><th>支付方式</th><th>状态</th><th>时间</th><th>操作</th></tr>
+          </thead>
+          <tbody id="orderTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+  <script>
+    var adminOrders = [
+      {id:'TP20261018001', status:'shipping', customer:'张三', phone:'138****8888', items:'Babolat Pure Aero 网球拍 x1, Dunlop AO 网球 x2', total:2077, payMethod:'支付宝', date:'10-18 14:32'},
+      {id:'TP20261018002', status:'pending', customer:'王五', phone:'137****7777', items:'Nike Air Zoom Vapor 网球鞋 x1', total:1099, payMethod:'待支付', date:'10-18 13:15'},
+      {id:'TP20261017003', status:'receiving', customer:'李四', phone:'139****6666', items:'Wilson Pro Staff RF97 网球拍 x1, Wilson 网球手胶 x3', total:2476, payMethod:'支付宝', date:'10-17 16:48'},
+      {id:'TP20261017004', status:'done', customer:'赵六', phone:'136****5555', items:'Dunlop AO 网球(4球装) x1', total:89, payMethod:'微信支付', date:'10-17 10:22'},
+      {id:'TP20261016005', status:'pending', customer:'钱七', phone:'135****4444', items:'Fila 网球Polo衫 x2, Nike 网球短裤 x1', total:797, payMethod:'待支付', date:'10-16 11:20'},
+      {id:'TP20261015006', status:'shipping', customer:'孙八', phone:'134****3333', items:'Babolat 12支装网球包 x1', total:599, payMethod:'支付宝', date:'10-15 09:45'},
+      {id:'TP20261014007', status:'done', customer:'周九', phone:'133****2222', items:'Head Speed Pro 网球拍 x1', total:1699, payMethod:'微信支付', date:'10-14 15:30'},
+      {id:'TP20261010008', status:'cancelled', customer:'吴十', phone:'132****1111', items:'Adidas Barricade 网球鞋 x1', total:899, payMethod:'已取消', date:'10-10 08:00'}
+    ];
+
+    var statusConfig = {
+      pending:{label:'待支付',cls:'badge-pending'},
+      shipping:{label:'待发货',cls:'badge-shipping'},
+      receiving:{label:'待收货',cls:'badge-receiving'},
+      done:{label:'已完成',cls:'badge-done'},
+      cancelled:{label:'已取消',cls:'badge-cancelled'}
+    };
+    var currentStatus = 'all';
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('#orderTabs .cat-pill').forEach(function(tab) {
+        tab.onclick = function() {
+          document.querySelectorAll('#orderTabs .cat-pill').forEach(function(t){t.classList.remove('active');});
+          tab.classList.add('active');
+          currentStatus = tab.dataset.status;
+          renderTable();
+        };
+      });
+      renderTable();
+    });
+
+    function renderTable() {
+      var tbody = document.getElementById('orderTableBody');
+      tbody.innerHTML = '';
+      var filtered = currentStatus === 'all' ? adminOrders : adminOrders.filter(function(o){return o.status===currentStatus;});
+      filtered.forEach(function(order) {
+        var config = statusConfig[order.status];
+        var tr = document.createElement('tr');
+        var actionHTML = '';
+        if (order.status === 'shipping') {
+          actionHTML = '<button class="btn btn-accent btn-sm" onclick="shipOrder(\'' + order.id + '\')">发货</button>';
+        } else if (order.status === 'pending') {
+          actionHTML = '<span style="font-size:var(--fs-micro);color:var(--muted-2);">等待支付</span>';
+        } else {
+          actionHTML = '<button class="btn btn-outline btn-sm" onclick="viewOrder(\'' + order.id + '\')">详情</button>';
+        }
+        tr.innerHTML = '<td>' + order.id + '</td>' +
+          '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + order.items + '</td>' +
+          '<td>' + order.customer + '<br/><span style="font-size:var(--fs-micro);color:var(--muted-2);">' + order.phone + '</span></td>' +
+          '<td>¥' + order.total + '</td>' +
+          '<td>' + order.payMethod + '</td>' +
+          '<td><span class="badge ' + config.cls + '">' + config.label + '</span></td>' +
+          '<td>' + order.date + '</td>' +
+          '<td>' + actionHTML + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function shipOrder(id) {
+      var order = adminOrders.find(function(o){return o.id===id;});
+      if (order) { order.status = 'receiving'; order.payMethod = '支付宝'; renderTable(); TennisPro.showToast('发货成功，订单状态已更新为"待收货"'); }
+    }
+
+    function viewOrder(id) { TennisPro.showToast('订单详情：' + id); }
+  </script>
+</body>
+</html>

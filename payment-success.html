@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>支付成功 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="container" style="padding-top:var(--gap-4xl);padding-bottom:var(--gap-4xl);max-width:600px;">
+    <div class="card" style="padding:var(--gap-4xl) var(--gap-2xl);text-align:center;">
+      <div style="width:96px;height:96px;border-radius:50%;background:rgba(34,197,94,.12);display:flex;align-items:center;justify-content:center;margin:0 auto var(--gap-xl);">
+        <div style="font-size:48px;">✓</div>
+      </div>
+      <h1 style="font-size:var(--fs-h1);font-weight:300;margin-bottom:16px;">支付成功</h1>
+      <p style="font-size:var(--fs-lead);color:var(--muted);margin-bottom:8px;">订单已提交，等待商家发货</p>
+      <p style="font-size:var(--fs-small);color:var(--muted-2);margin-bottom:var(--gap-xl);">订单号：<span id="orderNo"></span></p>
+
+      <div style="background:var(--surface-2);border-radius:var(--radius-lg);padding:var(--gap-lg);margin-bottom:var(--gap-xl);text-align:left;">
+        <div class="row-between" style="margin-bottom:12px;">
+          <span style="color:var(--muted);font-size:var(--fs-small);">支付方式</span>
+          <span style="font-size:var(--fs-small);">支付宝</span>
+        </div>
+        <div class="row-between" style="margin-bottom:12px;">
+          <span style="color:var(--muted);font-size:var(--fs-small);">支付金额</span>
+          <span style="font-weight:600;color:var(--accent);font-family:var(--font-display);font-size:20px;" id="payAmount">¥0.00</span>
+        </div>
+        <div class="row-between">
+          <span style="color:var(--muted);font-size:var(--fs-small);">订单状态</span>
+          <span class="badge badge-shipping">待发货</span>
+        </div>
+      </div>
+
+      <div class="stack" style="gap:12px;">
+        <a href="orders.html" class="btn btn-accent btn-lg" style="width:100%;">查看我的订单 →</a>
+        <a href="products.html" class="btn btn-outline btn-lg" style="width:100%;">继续购物</a>
+      </div>
+    </div>
+
+    <!-- What's next -->
+    <div class="card" style="padding:var(--gap-lg);margin-top:var(--gap-lg);">
+      <h3 style="font-size:var(--fs-small);font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--gap-md);">接下来</h3>
+      <div class="stack" style="gap:16px;">
+        <div class="row" style="gap:16px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+          <div><div style="font-size:var(--fs-small);font-weight:500;">商家确认发货</div><div style="font-size:var(--fs-micro);color:var(--muted-2);">通常24小时内发货</div></div>
+        </div>
+        <div class="row" style="gap:16px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--surface-3);color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+          <div><div style="font-size:var(--fs-small);font-weight:500;">收到商品后确认收货</div><div style="font-size:var(--fs-micro);color:var(--muted-2);">在"我的订单"中操作确认收货</div></div>
+        </div>
+        <div class="row" style="gap:16px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--surface-3);color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+          <div><div style="font-size:var(--fs-small);font-weight:500;">订单完成</div><div style="font-size:var(--fs-micro);color:var(--muted-2);">交易圆满完成</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var orderData = JSON.parse(sessionStorage.getItem('tennispro_order') || '{}');
+      if (orderData.orderNo) {
+        document.getElementById('orderNo').textContent = orderData.orderNo;
+        document.getElementById('payAmount').textContent = '¥' + (orderData.total || 0).toFixed(2);
+      } else {
+        document.getElementById('orderNo').textContent = 'TP' + Date.now().toString().slice(-10);
+        document.getElementById('payAmount').textContent = '¥329.00';
+      }
+      TennisPro.updateCartBadge();
+    });
+  </script>
+</body>
+</html>

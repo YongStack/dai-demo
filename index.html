@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TennisPro · 你的网球装备，一站搞定</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder" data-active="home"></div>
+
+  <!-- Hero Carousel -->
+  <div class="container" style="padding-top:var(--gap-lg);">
+    <div class="carousel" id="heroCarousel">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-slide" style="background:linear-gradient(135deg,#0A0E0C 0%,#1A3320 50%,#0A0E0C 100%);">
+          <div style="max-width:600px;">
+            <div style="color:var(--accent);font-size:var(--fs-small);font-weight:600;letter-spacing:2px;margin-bottom:16px;text-transform:uppercase;">2026 新赛季 · 上新</div>
+            <h1 style="font-size:var(--fs-display);font-weight:300;line-height:1;margin-bottom:24px;">你的网球装备<br/><span style="color:var(--accent);">一站搞定</span></h1>
+            <p style="font-size:var(--fs-lead);color:var(--muted);margin-bottom:32px;max-width:480px;">从专业球拍到速干服装，TennisPro 为你提供全品类网球运动装备。满99元免运费，支付宝/微信支付安全便捷。</p>
+            <div class="row" style="gap:16px;">
+              <a href="products.html" class="btn btn-accent btn-lg">立即选购 →</a>
+              <a href="products.html?cat=rackets" class="btn btn-ghost btn-lg">网球拍专区</a>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-slide" style="background:linear-gradient(135deg,#0A0E0C 0%,#1A2820 50%,#0A0E0C 100%);">
+          <div style="max-width:600px;">
+            <div style="color:var(--accent-2);font-size:var(--fs-small);font-weight:600;letter-spacing:2px;margin-bottom:16px;text-transform:uppercase;">限时特惠 · 低至6折</div>
+            <h1 style="font-size:var(--fs-display);font-weight:300;line-height:1;margin-bottom:24px;">明星球拍<br/><span style="color:var(--accent-2);">限时直降</span></h1>
+            <p style="font-size:var(--fs-lead);color:var(--muted);margin-bottom:32px;">Babolat、Wilson、Head 三大牌专业球拍限时特惠，数量有限，售完即止。</p>
+            <a href="products.html?cat=rackets" class="btn btn-accent btn-lg">抢购球拍 →</a>
+          </div>
+        </div>
+        <div class="carousel-slide" style="background:linear-gradient(135deg,#0A0E0C 0%,#242018 50%,#0A0E0C 100%);">
+          <div style="max-width:600px;">
+            <div style="color:var(--accent);font-size:var(--fs-small);font-weight:600;letter-spacing:2px;margin-bottom:16px;text-transform:uppercase;">全副武装 · 配件齐全</div>
+            <h1 style="font-size:var(--fs-display);font-weight:300;line-height:1;margin-bottom:24px;">手胶·避震·护具<br/><span style="color:var(--accent);">应有尽有</span></h1>
+            <p style="font-size:var(--fs-lead);color:var(--muted);margin-bottom:32px;">从手胶到避震器，从护腕到球包，一站式配齐你的网球装备。</p>
+            <a href="products.html?cat=accessories" class="btn btn-accent btn-lg">选购配件 →</a>
+          </div>
+        </div>
+      </div>
+      <button class="carousel-btn prev" onclick="prevSlide()">‹</button>
+      <button class="carousel-btn next" onclick="nextSlide()">›</button>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="container section">
+    <div class="row-between" style="margin-bottom:var(--gap-xl);">
+      <h2 style="font-size:var(--fs-h2);font-weight:400;">六大品类 · 总有你的选择</h2>
+      <a href="products.html" class="btn btn-outline btn-sm">查看全部 →</a>
+    </div>
+    <div class="grid grid-3" id="categoryGrid"></div>
+  </div>
+
+  <!-- Hot Products -->
+  <div class="container section" style="border-top:1px solid var(--border);">
+    <div class="row-between" style="margin-bottom:var(--gap-xl);">
+      <h2 style="font-size:var(--fs-h2);font-weight:400;">热销商品</h2>
+      <a href="products.html?sort=sales" class="btn btn-outline btn-sm">更多商品 →</a>
+    </div>
+    <div class="grid grid-4" id="hotProducts"></div>
+  </div>
+
+  <!-- New Arrivals -->
+  <div class="container section" style="border-top:1px solid var(--border);">
+    <div class="row-between" style="margin-bottom:var(--gap-xl);">
+      <h2 style="font-size:var(--fs-h2);font-weight:400;">为你推荐</h2>
+    </div>
+    <div class="grid grid-4" id="recommendedProducts"></div>
+  </div>
+
+  <!-- Features Strip -->
+  <div class="container section" style="border-top:1px solid var(--border);">
+    <div class="grid grid-4">
+      <div class="card" style="padding:var(--gap-lg);text-align:center;">
+        <div style="font-size:36px;margin-bottom:12px;">🚚</div>
+        <h4 style="font-size:var(--fs-body);font-weight:600;margin-bottom:4px;">满99免运费</h4>
+        <p style="font-size:var(--fs-small);color:var(--muted);">全场满99元免运费</p>
+      </div>
+      <div class="card" style="padding:var(--gap-lg);text-align:center;">
+        <div style="font-size:36px;margin-bottom:12px;">🔒</div>
+        <h4 style="font-size:var(--fs-body);font-weight:600;margin-bottom:4px;">安全支付</h4>
+        <p style="font-size:var(--fs-small);color:var(--muted);">支付宝/微信安全支付</p>
+      </div>
+      <div class="card" style="padding:var(--gap-lg);text-align:center;">
+        <div style="font-size:36px;margin-bottom:12px;">↩️</div>
+        <h4 style="font-size:var(--fs-body);font-weight:600;margin-bottom:4px;">正品保障</h4>
+        <p style="font-size:var(--fs-small);color:var(--muted);">品牌授权正品保证</p>
+      </div>
+      <div class="card" style="padding:var(--gap-lg);text-align:center;">
+        <div style="font-size:36px;margin-bottom:12px;">⚡</div>
+        <h4 style="font-size:var(--fs-body);font-weight:600;margin-bottom:4px;">极速发货</h4>
+        <p style="font-size:var(--fs-small);color:var(--muted);">下单后24小时内发货</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Carousel
+    var currentSlide = 0;
+    var totalSlides = 3;
+    function updateCarousel() {
+      document.getElementById('carouselTrack').style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+      document.querySelectorAll('.carousel-dot').forEach(function(d,i){
+        d.classList.toggle('active', i === currentSlide);
+      });
+    }
+    function nextSlide() { currentSlide = (currentSlide + 1) % totalSlides; updateCarousel(); }
+    function prevSlide() { currentSlide = (currentSlide - 1 + totalSlides) % totalSlides; updateCarousel(); }
+    function goToSlide(i) { currentSlide = i; updateCarousel(); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Dots
+      var dotsContainer = document.getElementById('carouselDots');
+      for (var i = 0; i < totalSlides; i++) {
+        (function(idx) {
+          var dot = document.createElement('div');
+          dot.className = 'carousel-dot' + (idx === 0 ? ' active' : '');
+          dot.onclick = function() { goToSlide(idx); };
+          dotsContainer.appendChild(dot);
+        })(i);
+      }
+      // Auto-advance
+      setInterval(nextSlide, 5000);
+
+      // Categories
+      var catGrid = document.getElementById('categoryGrid');
+      TennisPro.CATEGORIES.forEach(function(cat) {
+        var card = document.createElement('a');
+        card.href = 'products.html?cat=' + cat.id;
+        card.className = 'card';
+        card.style.padding = 'var(--gap-xl) var(--gap-lg)';
+        card.style.textAlign = 'center';
+        card.innerHTML = '<div style="font-size:48px;margin-bottom:16px;">' + cat.icon + '</div>' +
+          '<h3 style="font-size:var(--fs-h4);font-weight:600;margin-bottom:8px;">' + cat.name + '</h3>' +
+          '<p style="font-size:var(--fs-small);color:var(--muted);">' + cat.desc + '</p>';
+        catGrid.appendChild(card);
+      });
+
+      // Hot products (top 4 by sales)
+      var hotGrid = document.getElementById('hotProducts');
+      var hotProducts = TennisPro.PRODUCTS.filter(function(p){return p.stock>0;}).sort(function(a,b){return b.sales-a.sales;}).slice(0,4);
+      hotProducts.forEach(function(p) {
+        hotGrid.appendChild(createProductCard(p));
+      });
+
+      // Recommended (middle products)
+      var recGrid = document.getElementById('recommendedProducts');
+      var recProducts = TennisPro.PRODUCTS.filter(function(p){return p.stock>0;}).slice(4,8);
+      recProducts.forEach(function(p) {
+        recGrid.appendChild(createProductCard(p));
+      });
+    });
+
+    function createProductCard(p) {
+      var card = document.createElement('a');
+      card.href = 'product-detail.html?id=' + p.id;
+      card.className = 'product-card';
+      var cat = TennisPro.CATEGORIES.find(function(c){return c.id===p.cat;});
+      card.innerHTML =
+        '<div class="product-card-img">' +
+          (p.tag ? '<span class="product-tag">' + p.tag + '</span>' : '') +
+          '<span class="ph">' + (cat ? cat.icon : '🎾') + '</span>' +
+        '</div>' +
+        '<div class="product-card-body">' +
+          '<div class="product-card-name">' + p.name + '</div>' +
+          '<div class="product-card-price">¥' + p.price + '</div>' +
+          (p.originalPrice ? '<div style="font-size:var(--fs-micro);color:var(--muted-2);text-decoration:line-through;">¥' + p.originalPrice + '</div>' : '') +
+          '<div class="product-card-sales">已售 ' + p.sales + ' 件</div>' +
+        '</div>';
+      return card;
+    }
+  </script>
+</body>
+</html>
