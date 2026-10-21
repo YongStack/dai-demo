@@ -5,8 +5,17 @@
   "scripts": {
     "dev": "npx http-server . -p 3000 -c-1 --cors",
     "build": "echo 'Static site - no build step required'",
-    "start": "npx http-server . -p 3000 -c-1 --cors"
+    "start": "npx http-server . -p 3000 -c-1 --cors",
+    "test:e2e": "npx playwright test",
+    "test:e2e:report": "npx playwright show-report e2e-report"
   },
-  "keywords": ["tennis", "ecommerce", "shop"],
-  "license": "MIT"
+  "keywords": [
+    "tennis",
+    "ecommerce",
+    "shop"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
 }
