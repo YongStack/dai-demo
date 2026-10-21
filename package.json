@@ -1,0 +1,12 @@
+{
+  "name": "tennispro-online-shop",
+  "version": "1.0.0",
+  "description": "TennisPro 网球产品在线购物网站",
+  "scripts": {
+    "dev": "npx http-server . -p 3000 -c-1 --cors",
+    "build": "echo 'Static site - no build step required'",
+    "start": "npx http-server . -p 3000 -c-1 --cors"
+  },
+  "keywords": ["tennis", "ecommerce", "shop"],
+  "license": "MIT"
+}

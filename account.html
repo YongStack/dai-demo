@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>个人中心 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="container" style="padding-top:var(--gap-xl);padding-bottom:var(--gap-4xl);">
+    <!-- User card -->
+    <div class="card" style="padding:var(--gap-xl);margin-bottom:var(--gap-lg);display:flex;align-items:center;gap:24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#0A0E0C;" id="userAvatar">U</div>
+      <div style="flex:1;">
+        <h2 style="font-size:var(--fs-h3);font-weight:600;" id="userName">未登录</h2>
+        <p style="font-size:var(--fs-small);color:var(--muted);margin-top:4px;" id="userPhone">请登录以查看个人信息</p>
+      </div>
+      <a href="login.html" class="btn btn-outline btn-sm" id="switchAccountBtn">登录</a>
+    </div>
+
+    <!-- Quick links -->
+    <div class="grid grid-4" style="margin-bottom:var(--gap-lg);">
+      <a href="orders.html?status=pending" class="card" style="padding:var(--gap-lg);text-align:center;">
+        <div style="font-size:32px;margin-bottom:8px;">💳</div>
+        <div style="font-size:var(--fs-small);font-weight:500;">待支付</div>
+        <div class="order-count" data-status="pending" style="font-size:var(--fs-micro);color:var(--muted-2);margin-top:4px;">0 笔</div>
+      </a>
+      <a href="orders.html?status=shipping" class="card" style="padding:var(--gap-lg);text-align:center;">
+        <div style="font-size:32px;margin-bottom:8px;">📦</div>
+        <div style="font-size:var(--fs-small);font-weight:500;">待发货</div>
+        <div class="order-count" data-status="shipping" style="font-size:var(--fs-micro);color:var(--muted-2);margin-top:4px;">0 笔</div>
+      </a>
+      <a href="orders.html?status=receiving" class="card" style="padding:var(--gap-lg);text-align:center;">
+        <div style="font-size:32px;margin-bottom:8px;">🚚</div>
+        <div style="font-size:var(--fs-small);font-weight:500;">待收货</div>
+        <div class="order-count" data-status="receiving" style="font-size:var(--fs-micro);color:var(--muted-2);margin-top:4px;">0 笔</div>
+      </a>
+      <a href="orders.html" class="card" style="padding:var(--gap-lg);text-align:center;">
+        <div style="font-size:32px;margin-bottom:8px;">📋</div>
+        <div style="font-size:var(--fs-small);font-weight:500;">全部订单</div>
+        <div class="order-count" data-status="all" style="font-size:var(--fs-micro);color:var(--muted-2);margin-top:4px;">0 笔</div>
+      </a>
+    </div>
+
+    <!-- Addresses -->
+    <div class="card" style="padding:var(--gap-lg);margin-bottom:var(--gap-lg);">
+      <div class="row-between" style="margin-bottom:var(--gap-md);">
+        <h3 style="font-size:var(--fs-h4);font-weight:600;">收货地址管理</h3>
+        <button class="btn btn-outline btn-sm" onclick="toggleAddrForm()">+ 新增地址</button>
+      </div>
+      <div id="addrList" class="stack" style="gap:12px;"></div>
+      <div id="addrForm" class="hidden" style="margin-top:var(--gap-lg);padding-top:var(--gap-lg);border-top:1px solid var(--border);">
+        <div class="grid grid-2" style="gap:16px;">
+          <div style="margin:0;"><label class="form-label">收货人</label><input class="form-input" id="newAddrName" placeholder="收货人姓名" /></div>
+          <div style="margin:0;"><label class="form-label">手机号</label><input class="form-input" id="newAddrPhone" placeholder="手机号" /></div>
+        </div>
+        <div style="margin-top:16px;"><label class="form-label">详细地址</label><textarea class="form-input" id="newAddrDetail" placeholder="详细收货地址"></textarea></div>
+        <div class="row" style="gap:12px;margin-top:16px;">
+          <label class="row" style="gap:8px;font-size:var(--fs-small);cursor:pointer;"><input type="checkbox" id="setDefault" style="accent-color:var(--accent);" /> 设为默认地址</label>
+        </div>
+        <button class="btn btn-accent btn-sm" style="margin-top:16px;" onclick="saveAddr()">保存地址</button>
+      </div>
+    </div>
+
+    <!-- Profile info -->
+    <div class="card" style="padding:var(--gap-lg);">
+      <h3 style="font-size:var(--fs-h4);font-weight:600;margin-bottom:var(--gap-md);">个人信息</h3>
+      <div class="stack" style="gap:16px;">
+        <div class="row-between" style="padding:12px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--muted);font-size:var(--fs-small);">昵称</span>
+          <input class="form-input" style="width:auto;text-align:right;" id="nicknameInput" value="网球达人" />
+        </div>
+        <div class="row-between" style="padding:12px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--muted);font-size:var(--fs-small);">手机号</span>
+          <span style="font-size:var(--fs-small);" id="phoneDisplay">未登录</span>
+        </div>
+        <div class="row-between" style="padding:12px 0;">
+          <span style="color:var(--muted);font-size:var(--fs-small);">性别</span>
+          <select class="form-input" style="width:auto;padding:8px 16px;" id="genderSelect">
+            <option>男</option>
+            <option>女</option>
+            <option>保密</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-accent btn-sm" style="margin-top:var(--gap-md);" onclick="saveProfile()">保存修改</button>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/app.js"></script>
+  <script>
+    var addresses = TennisPro.getAddresses();
+    if (addresses.length === 0) {
+      addresses = [
+        {id:1, name:'张三', phone:'138****8888', detail:'上海市浦东新区张江高科技园区博云路2号', isDefault:true},
+        {id:2, name:'李四', phone:'139****6666', detail:'北京市海淀区中关村大街1号', isDefault:false}
+      ];
+      TennisPro.saveAddresses(addresses);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var user = TennisPro.getUser();
+      if (user) {
+        document.getElementById('userName').textContent = user.name || ('用户' + (user.phone || '').slice(-4));
+        document.getElementById('userPhone').textContent = user.phone ? (user.phone.slice(0,3) + '****' + user.phone.slice(-4)) : '';
+        document.getElementById('userAvatar').textContent = (user.name || 'U').charAt(0).toUpperCase();
+        document.getElementById('phoneDisplay').textContent = user.phone ? (user.phone.slice(0,3) + '****' + user.phone.slice(-4)) : '';
+        document.getElementById('switchAccountBtn').textContent = '退出登录';
+        document.getElementById('switchAccountBtn').href = 'javascript:void(0)';
+        document.getElementById('switchAccountBtn').onclick = function() {
+          TennisPro.clearUser();
+          TennisPro.showToast('已退出登录');
+          setTimeout(function(){ window.location.href = 'index.html'; }, 800);
+        };
+        if (user.nickname) document.getElementById('nicknameInput').value = user.nickname;
+        if (user.gender) document.getElementById('genderSelect').value = user.gender;
+      }
+
+      renderAddrs();
+      updateOrderCounts();
+    });
+
+    function updateOrderCounts() {
+      var orders = TennisPro.getOrders();
+      document.querySelectorAll('.order-count').forEach(function(el) {
+        var status = el.dataset.status;
+        var count = status === 'all' ? orders.length : orders.filter(function(o){return o.status===status;}).length;
+        el.textContent = count + ' 笔';
+      });
+    }
+
+    function renderAddrs() {
+      var list = document.getElementById('addrList');
+      list.innerHTML = '';
+      if (addresses.length === 0) {
+        list.innerHTML = '<div style="color:var(--muted);font-size:var(--fs-small);padding:12px;">暂无收货地址</div>';
+        return;
+      }
+      addresses.forEach(function(addr) {
+        var div = document.createElement('div');
+        div.style.cssText = 'padding:16px;border:1px solid var(--border);border-radius:var(--radius);';
+        div.innerHTML = '<div class="row-between"><div class="row" style="gap:12px;"><span style="font-weight:600;font-size:var(--fs-small);">' + addr.name + '</span><span style="color:var(--muted);font-size:var(--fs-small);">' + addr.phone + '</span>' + (addr.isDefault?'<span class="badge badge-shipping">默认</span>':'') + '</div><div class="row" style="gap:8px;"><button class="btn btn-outline btn-sm" onclick="editAddr(' + addr.id + ')">编辑</button><button class="btn btn-sm" style="color:var(--danger);" onclick="delAddr(' + addr.id + ')">删除</button></div></div><div style="font-size:var(--fs-small);color:var(--muted);margin-top:8px;">' + addr.detail + '</div>';
+        list.appendChild(div);
+      });
+    }
+
+    function toggleAddrForm() { document.getElementById('addrForm').classList.toggle('hidden'); }
+    function saveAddr() {
+      var n = document.getElementById('newAddrName').value;
+      var p = document.getElementById('newAddrPhone').value;
+      var d = document.getElementById('newAddrDetail').value;
+      if (!n || !p || !d) { TennisPro.showToast('请填写完整'); return; }
+      var isDefault = document.getElementById('setDefault').checked;
+      if (isDefault) addresses.forEach(function(a){a.isDefault=false;});
+      var newId = addresses.length > 0 ? Math.max.apply(null, addresses.map(function(a){return a.id;})) + 1 : 1;
+      addresses.push({id:newId, name:n, phone:p, detail:d, isDefault:isDefault});
+      TennisPro.saveAddresses(addresses);
+      document.getElementById('addrForm').classList.add('hidden');
+      ['newAddrName','newAddrPhone','newAddrDetail'].forEach(function(id){document.getElementById(id).value='';});
+      document.getElementById('setDefault').checked = false;
+      renderAddrs();
+      TennisPro.showToast('地址已保存');
+    }
+    function editAddr(id) { TennisPro.showToast('编辑地址功能'); }
+    function delAddr(id) {
+      addresses = addresses.filter(function(a){return a.id!==id;});
+      TennisPro.saveAddresses(addresses);
+      renderAddrs();
+      TennisPro.showToast('已删除');
+    }
+    function saveProfile() {
+      var user = TennisPro.getUser();
+      if (!user) { TennisPro.showToast('请先登录'); setTimeout(function(){window.location.href='login.html';},800); return; }
+      user.nickname = document.getElementById('nicknameInput').value;
+      user.gender = document.getElementById('genderSelect').value;
+      TennisPro.saveUser(user);
+      document.getElementById('userName').textContent = user.nickname || user.name;
+      TennisPro.showToast('已保存');
+    }
+  </script>
+</body>
+</html>

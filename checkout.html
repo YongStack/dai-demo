@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>结算 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="container" style="padding-top:var(--gap-xl);padding-bottom:var(--gap-4xl);max-width:1000px;">
+    <h1 style="font-size:var(--fs-h2);font-weight:400;margin-bottom:var(--gap-xl);">确认订单</h1>
+
+    <!-- Address section -->
+    <div class="card" style="padding:var(--gap-lg);margin-bottom:var(--gap-lg);">
+      <div class="row-between" style="margin-bottom:var(--gap-md);">
+        <h3 style="font-size:var(--fs-h4);font-weight:600;">收货地址</h3>
+        <button class="btn btn-outline btn-sm" onclick="toggleNewAddress()">+ 新增地址</button>
+      </div>
+      <div id="addressList" class="stack" style="gap:12px;"></div>
+      <!-- New address form (hidden) -->
+      <div id="newAddressForm" class="hidden" style="margin-top:var(--gap-lg);padding-top:var(--gap-lg);border-top:1px solid var(--border);">
+        <div class="grid grid-2" style="gap:16px;">
+          <div class="form-group" style="margin:0;"><label class="form-label">收货人</label><input class="form-input" id="addrName" placeholder="请输入收货人姓名" /></div>
+          <div class="form-group" style="margin:0;"><label class="form-label">手机号</label><input class="form-input" id="addrPhone" placeholder="请输入手机号" /></div>
+        </div>
+        <div class="form-group" style="margin-top:16px;"><label class="form-label">详细地址</label><textarea class="form-input" id="addrDetail" placeholder="请输入详细收货地址"></textarea></div>
+        <button class="btn btn-accent btn-sm" onclick="saveNewAddress()">保存地址</button>
+      </div>
+    </div>
+
+    <!-- Order items -->
+    <div class="card" style="padding:var(--gap-lg);margin-bottom:var(--gap-lg);">
+      <h3 style="font-size:var(--fs-h4);font-weight:600;margin-bottom:var(--gap-md);">商品清单</h3>
+      <div id="orderItems" class="stack" style="gap:12px;"></div>
+    </div>
+
+    <!-- Summary -->
+    <div class="card" style="padding:var(--gap-lg);">
+      <h3 style="font-size:var(--fs-h4);font-weight:600;margin-bottom:var(--gap-lg);">费用明细</h3>
+      <div class="stack" style="gap:12px;margin-bottom:var(--gap-lg);" id="feeDetails"></div>
+      <div class="row-between" style="padding-top:var(--gap-lg);border-top:1px solid var(--border);margin-bottom:var(--gap-lg);">
+        <span style="font-size:var(--fs-h4);">应付总额</span>
+        <span style="font-family:var(--font-display);font-size:32px;font-weight:700;color:var(--accent);" id="totalAmount">¥0.00</span>
+      </div>
+      <button class="btn btn-accent btn-lg" style="width:100%;" onclick="submitOrder()">提交订单 →</button>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/app.js"></script>
+  <script>
+    // Guard: redirect to login if not logged in
+    if (!TennisPro.isLoggedIn()) {
+      window.location.href = 'login.html?returnUrl=' + encodeURIComponent('checkout.html');
+    }
+
+    var addresses = TennisPro.getAddresses();
+    // Seed default addresses if empty
+    if (addresses.length === 0) {
+      addresses = [
+        {id:1, name:'张三', phone:'138****8888', detail:'上海市浦东新区张江高科技园区博云路2号', isDefault:true},
+        {id:2, name:'李四', phone:'139****6666', detail:'北京市海淀区中关村大街1号', isDefault:false}
+      ];
+      TennisPro.saveAddresses(addresses);
+    }
+    var selectedAddressId = addresses.length > 0 ? addresses[0].id : null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderAddresses();
+      renderOrderItems();
+      renderFees();
+    });
+
+    function renderAddresses() {
+      var list = document.getElementById('addressList');
+      list.innerHTML = '';
+      if (addresses.length === 0) {
+        list.innerHTML = '<div style="color:var(--muted);font-size:var(--fs-small);padding:12px;">暂无收货地址，请点击新增地址</div>';
+        return;
+      }
+      addresses.forEach(function(addr) {
+        var div = document.createElement('div');
+        div.style.cssText = 'padding:16px;border:2px solid ' + (selectedAddressId===addr.id?'var(--accent)':'var(--border)') + ';border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;gap:16px;';
+        div.onclick = function() { selectedAddressId = addr.id; renderAddresses(); };
+        div.innerHTML = 
+          '<input type="radio" ' + (selectedAddressId===addr.id?'checked':'') + ' style="accent-color:var(--accent);width:18px;height:18px;" />' +
+          '<div style="flex:1;">' +
+            '<div class="row" style="gap:12px;margin-bottom:4px;"><span style="font-weight:600;">' + addr.name + '</span><span style="color:var(--muted);">' + addr.phone + '</span>' + (addr.isDefault?'<span class="badge badge-shipping">默认</span>':'') + '</div>' +
+            '<div style="font-size:var(--fs-small);color:var(--muted);">' + addr.detail + '</div>' +
+          '</div>';
+        list.appendChild(div);
+      });
+    }
+
+    function toggleNewAddress() {
+      document.getElementById('newAddressForm').classList.toggle('hidden');
+    }
+
+    function saveNewAddress() {
+      var name = document.getElementById('addrName').value;
+      var phone = document.getElementById('addrPhone').value;
+      var detail = document.getElementById('addrDetail').value;
+      if (!name || !phone || !detail) { TennisPro.showToast('请填写完整地址信息'); return; }
+      var newId = addresses.length > 0 ? Math.max.apply(null, addresses.map(function(a){return a.id;})) + 1 : 1;
+      addresses.push({id:newId, name:name, phone:phone, detail:detail, isDefault:false});
+      TennisPro.saveAddresses(addresses);
+      selectedAddressId = newId;
+      renderAddresses();
+      document.getElementById('newAddressForm').classList.add('hidden');
+      document.getElementById('addrName').value = '';
+      document.getElementById('addrPhone').value = '';
+      document.getElementById('addrDetail').value = '';
+      TennisPro.showToast('地址已添加');
+    }
+
+    function renderOrderItems() {
+      var cart = TennisPro.getSelectedCart();
+      var container = document.getElementById('orderItems');
+      if (cart.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">购物车为空，<a href="products.html" style="color:var(--accent);">去购物 →</a></div>';
+        return;
+      }
+      cart.forEach(function(item) {
+        var cat = TennisPro.CATEGORIES.find(function(c){return c.id===item.img;});
+        var div = document.createElement('div');
+        div.className = 'row-between';
+        div.style.cssText = 'padding-bottom:12px;border-bottom:1px solid var(--border);';
+        div.innerHTML = 
+          '<div class="row" style="gap:12px;align-items:center;">' +
+            '<div class="product-card-img" style="width:56px;height:56px;border-radius:var(--radius);"><span class="ph" style="font-size:24px;">' + (cat?cat.icon:'🎾') + '</span></div>' +
+            '<div><div style="font-size:var(--fs-small);font-weight:500;">' + item.name + '</div><div style="font-size:var(--fs-micro);color:var(--muted-2);">规格：' + item.spec + '</div></div>' +
+          '</div>' +
+          '<div class="row" style="gap:24px;align-items:center;">' +
+            '<span style="font-size:var(--fs-small);color:var(--muted);">x' + item.qty + '</span>' +
+            '<span style="font-weight:600;">¥' + (item.price * item.qty).toFixed(2) + '</span>' +
+          '</div>';
+        container.appendChild(div);
+      });
+    }
+
+    function renderFees() {
+      var cart = TennisPro.getSelectedCart();
+      var subtotal = cart.reduce(function(s,x){return s+x.price*x.qty;},0);
+      var shipping = subtotal >= 99 ? 0 : 10;
+      var total = subtotal + shipping;
+      var remaining = 99 - subtotal;
+
+      var html = '<div class="row-between"><span style="color:var(--muted);font-size:var(--fs-small);">商品金额</span><span>¥' + subtotal.toFixed(2) + '</span></div>' +
+        '<div class="row-between"><span style="color:var(--muted);font-size:var(--fs-small);">运费</span><span style="color:' + (shipping===0?'var(--success)':'var(--fg)') + ';">' + (shipping===0?'免运费':'¥'+shipping.toFixed(2)) + '</span></div>';
+      if (remaining > 0) {
+        html += '<div style="padding:12px;background:var(--accent-soft);border-radius:var(--radius);font-size:var(--fs-small);color:var(--accent);">满99元免运费，还差¥' + remaining.toFixed(2) + '元</div>';
+      } else {
+        html += '<div style="padding:12px;background:rgba(34,197,94,.12);border-radius:var(--radius);font-size:var(--fs-small);color:var(--success);">已满99元，免运费 ✓</div>';
+      }
+      document.getElementById('feeDetails').innerHTML = html;
+      document.getElementById('totalAmount').textContent = '¥' + total.toFixed(2);
+    }
+
+    function submitOrder() {
+      var cart = TennisPro.getSelectedCart();
+      if (cart.length === 0) { TennisPro.showToast('购物车为空'); return; }
+      if (!selectedAddressId) { TennisPro.showToast('请选择收货地址'); return; }
+      // Generate order number
+      var orderNo = TennisPro.generateOrderNo();
+      var subtotal = cart.reduce(function(s,x){return s+x.price*x.qty;},0);
+      var shipping = subtotal >= 99 ? 0 : 10;
+      var total = subtotal + shipping;
+      var addr = addresses.find(function(a){return a.id===selectedAddressId;});
+
+      // Build order items snapshot
+      var orderItems = cart.map(function(item) {
+        return {name:item.name, spec:item.spec, qty:item.qty, price:item.price};
+      });
+
+      // Save order
+      TennisPro.addOrder({
+        id: orderNo,
+        status: 'pending',
+        items: orderItems,
+        total: total,
+        subtotal: subtotal,
+        shipping: shipping,
+        date: new Date().toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(/\//g,'-'),
+        payMethod: '待支付',
+        address: addr ? addr.name + ' ' + addr.phone + ' ' + addr.detail : ''
+      });
+
+      // Store current order for payment page
+      sessionStorage.setItem('tennispro_order', JSON.stringify({orderNo:orderNo, total:total, items:cart.length}));
+
+      // Remove selected items from cart
+      var fullCart = TennisPro.getCart();
+      var remainingCart = fullCart.filter(function(x){return x.selected === false;});
+      TennisPro.saveCart(remainingCart);
+
+      TennisPro.showToast('订单创建成功！');
+      setTimeout(function(){ window.location.href = 'payment.html'; }, 800);
+    }
+  </script>
+</body>
+</html>

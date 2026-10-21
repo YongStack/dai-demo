@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>购物车 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="container" style="padding-top:var(--gap-xl);padding-bottom:var(--gap-4xl);">
+    <h1 style="font-size:var(--fs-h2);font-weight:400;margin-bottom:var(--gap-xl);">购物车</h1>
+
+    <!-- Cart with items -->
+    <div id="cartContent"></div>
+
+    <!-- Empty cart -->
+    <div class="empty-state hidden" id="emptyCart">
+      <div class="empty-icon">🛒</div>
+      <div class="empty-title">购物车空空如也</div>
+      <div class="empty-desc">去逛逛吧，发现你喜欢的网球装备</div>
+      <a href="products.html" class="btn btn-accent btn-lg">去逛逛 →</a>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      renderCart();
+    });
+
+    function renderCart() {
+      var cart = TennisPro.getCart();
+      var content = document.getElementById('cartContent');
+      var empty = document.getElementById('emptyCart');
+
+      if (cart.length === 0) {
+        content.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      var allSelected = cart.every(function(x){return x.selected !== false;});
+
+      var html = '<div class="grid" style="grid-template-columns:1fr 360px;gap:var(--gap-xl);align-items:start;">';
+      
+      // Cart items
+      html += '<div class="stack" style="gap:12px;">';
+      // Header
+      html += '<div class="card" style="padding:16px var(--gap-lg);"><div class="row-between"><div class="row" style="gap:16px;"><input type="checkbox" ' + (allSelected?'checked':'') + ' id="selectAll" style="accent-color:var(--accent);width:18px;height:18px;" /><span style="font-size:var(--fs-small);color:var(--muted);">全选</span></div><span style="font-size:var(--fs-small);color:var(--muted);">操作</span></div></div>';
+      
+      cart.forEach(function(item) {
+        var cat = TennisPro.CATEGORIES.find(function(c){return c.id===item.img;});
+        var isSel = item.selected !== false;
+        html += '<div class="card" style="padding:var(--gap-lg);">' +
+          '<div class="row-between">' +
+            '<div class="row" style="gap:16px;align-items:flex-start;">' +
+              '<input type="checkbox" ' + (isSel?'checked':'') + ' data-key="' + item.key + '" class="cart-item-check" style="accent-color:var(--accent);width:18px;height:18px;margin-top:40px;" />' +
+              '<div class="product-card-img" style="width:100px;height:100px;border-radius:var(--radius);flex-shrink:0;"><span class="ph" style="font-size:36px;">' + (cat?cat.icon:'🎾') + '</span></div>' +
+              '<div style="min-width:200px;">' +
+                '<a href="product-detail.html?id=' + item.productId + '" style="font-size:var(--fs-body);font-weight:500;">' + item.name + '</a>' +
+                '<div style="font-size:var(--fs-small);color:var(--muted);margin-top:4px;">规格：' + item.spec + '</div>' +
+                '<div style="font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--accent);margin-top:8px;">¥' + item.price + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="row" style="gap:16px;align-items:center;">' +
+              '<div class="row" style="gap:0;">' +
+                '<button class="btn btn-outline btn-sm" onclick="changeQty(\'' + item.key + '\',-1)" style="border-radius:8px 0 0 8px;">-</button>' +
+                '<span style="padding:8px 16px;background:var(--surface);border:1px solid var(--border-light);border-left:none;border-right:none;font-size:var(--fs-body);min-width:48px;text-align:center;">' + item.qty + '</span>' +
+                '<button class="btn btn-outline btn-sm" onclick="changeQty(\'' + item.key + '\',1)" style="border-radius:0 8px 8px 0;">+</button>' +
+              '</div>' +
+              '<button class="btn btn-sm" style="color:var(--danger);" onclick="removeItem(\'' + item.key + '\')">删除</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+
+      // Summary — only count selected items
+      var selectedCart = TennisPro.getSelectedCart();
+      var subtotal = selectedCart.reduce(function(s,x){return s+x.price*x.qty;},0);
+      var shipping = subtotal >= 99 ? 0 : 10;
+      var total = subtotal + shipping;
+      var remaining = 99 - subtotal;
+
+      html += '<div class="card" style="padding:var(--gap-lg);position:sticky;top:80px;">' +
+        '<h3 style="font-size:var(--fs-h4);font-weight:600;margin-bottom:var(--gap-lg);">订单摘要</h3>' +
+        '<div class="stack" style="gap:12px;margin-bottom:var(--gap-lg);">' +
+          '<div class="row-between"><span style="color:var(--muted);font-size:var(--fs-small);">已选商品</span><span>' + selectedCart.length + ' 件</span></div>' +
+          '<div class="row-between"><span style="color:var(--muted);font-size:var(--fs-small);">商品金额</span><span>¥' + subtotal.toFixed(2) + '</span></div>' +
+          '<div class="row-between"><span style="color:var(--muted);font-size:var(--fs-small);">运费</span><span style="color:' + (shipping===0?'var(--success)':'var(--fg)') + ';">' + (shipping===0?'免运费':'¥'+shipping.toFixed(2)) + '</span></div>' +
+          (subtotal > 0 && remaining > 0 ? '<div style="padding:12px;background:var(--accent-soft);border-radius:var(--radius);font-size:var(--fs-small);color:var(--accent);">满99元免运费，还差¥' + remaining.toFixed(2) + '元</div>' : '') +
+          (subtotal > 0 && remaining <= 0 ? '<div style="padding:12px;background:rgba(34,197,94,.12);border-radius:var(--radius);font-size:var(--fs-small);color:var(--success);">已满99元，免运费 ✓</div>' : '') +
+        '</div>' +
+        '<div class="row-between" style="padding-top:var(--gap-lg);border-top:1px solid var(--border);margin-bottom:var(--gap-lg);">' +
+          '<span style="font-size:var(--fs-h4);">合计</span>' +
+          '<span style="font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--accent);">¥' + total.toFixed(2) + '</span>' +
+        '</div>' +
+        '<button class="btn btn-accent btn-lg" style="width:100%;" onclick="goCheckout()">去结算（' + selectedCart.length + '件）→</button>' +
+        '<a href="products.html" class="btn btn-outline btn-sm" style="width:100%;margin-top:12px;">继续购物</a>' +
+      '</div>';
+
+      html += '</div>';
+      content.innerHTML = html;
+
+      // Select all
+      var selectAll = document.getElementById('selectAll');
+      if (selectAll) {
+        selectAll.onchange = function() {
+          document.querySelectorAll('.cart-item-check').forEach(function(c){
+            c.checked = selectAll.checked;
+            TennisPro.toggleSelect(c.dataset.key, selectAll.checked);
+          });
+          renderCart();
+        };
+      }
+      // Individual select
+      document.querySelectorAll('.cart-item-check').forEach(function(c) {
+        if (c.id === 'selectAll') return;
+        c.onchange = function() {
+          TennisPro.toggleSelect(c.dataset.key, c.checked);
+          renderCart();
+        };
+      });
+    }
+
+    function changeQty(key, delta) {
+      TennisPro.updateQty(key, delta);
+      renderCart();
+    }
+
+    function removeItem(key) {
+      TennisPro.removeFromCart(key);
+      renderCart();
+      TennisPro.showToast('已删除');
+    }
+
+    function goCheckout() {
+      var selected = TennisPro.getSelectedCart();
+      if (selected.length === 0) {
+        TennisPro.showToast('请选择要结算的商品');
+        return;
+      }
+      // Check login — redirect to login if not logged in
+      if (!TennisPro.requireLogin('checkout.html')) return;
+      window.location.href = 'checkout.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>商品管理 · TennisPro Admin</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-logo">Tennis<span>Pro</span> <span style="font-size:10px;color:var(--muted-2);">Admin</span></div>
+      <a href="admin-dashboard.html" class="admin-nav-item">📊 <span>数据概览</span></a>
+      <a href="admin-products.html" class="admin-nav-item active">🎾 <span>商品管理</span></a>
+      <a href="admin-orders.html" class="admin-nav-item">📦 <span>订单管理</span></a>
+      <a href="index.html" class="admin-nav-item" style="margin-top:auto;">🏠 <span>返回前台</span></a>
+    </div>
+
+    <div class="admin-main">
+      <div class="admin-header">
+        <h1 style="font-size:var(--fs-h2);font-weight:400;">商品管理</h1>
+        <button class="btn btn-accent btn-sm" onclick="toggleProductForm()">+ 新增商品</button>
+      </div>
+
+      <!-- New product form (hidden) -->
+      <div class="admin-card hidden" id="productForm" style="margin-bottom:var(--gap-lg);">
+        <h3 style="font-size:var(--fs-h4);font-weight:600;margin-bottom:var(--gap-lg);">新增商品</h3>
+        <div class="grid grid-2" style="gap:16px;">
+          <div style="margin:0;"><label class="form-label">商品名称</label><input class="form-input" id="pName" placeholder="商品名称" /></div>
+          <div style="margin:0;"><label class="form-label">商品分类</label>
+            <select class="form-input" id="pCat"><option value="rackets">网球拍</option><option value="balls">网球/球包</option><option value="shoes">网球鞋</option><option value="apparel">网球服装</option><option value="bags">球包/护具</option><option value="accessories">配件</option></select>
+          </div>
+          <div style="margin:0;"><label class="form-label">价格 (元)</label><input class="form-input" id="pPrice" type="number" placeholder="价格" /></div>
+          <div style="margin:0;"><label class="form-label">原价 (元)</label><input class="form-input" id="pOrig" type="number" placeholder="原价（可选）" /></div>
+          <div style="margin:0;"><label class="form-label">库存</label><input class="form-input" id="pStock" type="number" placeholder="库存数量" /></div>
+          <div style="margin:0;"><label class="form-label">规格 (逗号分隔)</label><input class="form-input" id="pSpecs" placeholder="270g,285g,300g" /></div>
+        </div>
+        <div style="margin-top:16px;"><label class="form-label">商品描述</label><textarea class="form-input" id="pDesc" placeholder="商品描述"></textarea></div>
+        <div class="row" style="gap:12px;margin-top:var(--gap-md);">
+          <button class="btn btn-accent btn-sm" onclick="addProduct()">保存上架</button>
+          <button class="btn btn-outline btn-sm" onclick="toggleProductForm()">取消</button>
+        </div>
+      </div>
+
+      <!-- Products table -->
+      <div class="admin-card">
+        <div class="row-between" style="margin-bottom:var(--gap-lg);">
+          <div class="nav-search" style="width:240px;">
+            <span style="opacity:.5;margin-right:8px;">🔍</span>
+            <input type="text" id="adminSearch" placeholder="搜索商品..." />
+          </div>
+          <select class="form-input" style="width:auto;padding:8px 16px;" id="catFilter">
+            <option value="">全部分类</option>
+            <option value="rackets">网球拍</option>
+            <option value="balls">网球/球包</option>
+            <option value="shoes">网球鞋</option>
+            <option value="apparel">网球服装</option>
+            <option value="bags">球包/护具</option>
+            <option value="accessories">配件</option>
+          </select>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>商品名称</th><th>分类</th><th>价格</th><th>库存</th><th>销量</th><th>状态</th><th>操作</th></tr>
+          </thead>
+          <tbody id="productTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+  <script>
+    var adminProducts = TennisPro.PRODUCTS.map(function(p) {
+      return Object.assign({}, p, {onShelf: true});
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderTable();
+      document.getElementById('adminSearch').oninput = renderTable;
+      document.getElementById('catFilter').onchange = renderTable;
+    });
+
+    function renderTable() {
+      var search = document.getElementById('adminSearch').value.toLowerCase();
+      var catFilter = document.getElementById('catFilter').value;
+      var tbody = document.getElementById('productTableBody');
+      tbody.innerHTML = '';
+
+      adminProducts.filter(function(p) {
+        if (catFilter && p.cat !== catFilter) return false;
+        if (search && p.name.toLowerCase().indexOf(search) < 0) return false;
+        return true;
+      }).forEach(function(p) {
+        var cat = TennisPro.CATEGORIES.find(function(c){return c.id===p.cat;});
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + p.name + '</td>' +
+          '<td>' + (cat?cat.name:'') + '</td>' +
+          '<td>¥' + p.price + '</td>' +
+          '<td style="color:' + (p.stock===0?'var(--danger)':'var(--fg)') + ';">' + p.stock + '</td>' +
+          '<td>' + p.sales + '</td>' +
+          '<td>' + (p.onShelf ? '<span class="badge badge-shipping">在售</span>' : '<span class="badge badge-cancelled">已下架</span>') + '</td>' +
+          '<td><div class="row" style="gap:8px;">' +
+            '<button class="btn btn-outline btn-sm" onclick="editProduct(' + p.id + ')">编辑</button>' +
+            (p.onShelf ? '<button class="btn btn-sm" style="color:var(--warning);" onclick="toggleShelf(' + p.id + ')">下架</button>' : '<button class="btn btn-sm" style="color:var(--success);" onclick="toggleShelf(' + p.id + ')">上架</button>') +
+            '</div></td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleShelf(id) {
+      var p = adminProducts.find(function(x){return x.id===id;});
+      if (p) { p.onShelf = !p.onShelf; renderTable(); TennisPro.showToast(p.onShelf?'已上架':'已下架'); }
+    }
+
+    function toggleProductForm() { document.getElementById('productForm').classList.toggle('hidden'); }
+
+    function addProduct() {
+      var name = document.getElementById('pName').value;
+      var price = parseFloat(document.getElementById('pPrice').value);
+      if (!name || !price) { TennisPro.showToast('请填写商品名称和价格'); return; }
+      var newId = Math.max.apply(null, adminProducts.map(function(p){return p.id;})) + 1;
+      adminProducts.push({
+        id:newId, name:name, cat:document.getElementById('pCat').value,
+        price:price, originalPrice:parseFloat(document.getElementById('pOrig').value)||0,
+        stock:parseInt(document.getElementById('pStock').value)||0,
+        sales:0, imgs:2, onShelf:true
+      });
+      TennisPro.showToast('商品已上架');
+      toggleProductForm();
+      renderTable();
+    }
+
+    function editProduct(id) { TennisPro.showToast('编辑商品功能'); }
+  </script>
+</body>
+</html>

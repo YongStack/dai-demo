@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>我的订单 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="container" style="padding-top:var(--gap-xl);padding-bottom:var(--gap-4xl);">
+    <h1 style="font-size:var(--fs-h2);font-weight:400;margin-bottom:var(--gap-xl);">我的订单</h1>
+
+    <!-- Order status tabs -->
+    <div class="row" style="gap:12px;margin-bottom:var(--gap-xl);flex-wrap:wrap;" id="statusTabs">
+      <div class="cat-pill active" data-status="all">全部</div>
+      <div class="cat-pill" data-status="pending">待支付</div>
+      <div class="cat-pill" data-status="shipping">待发货</div>
+      <div class="cat-pill" data-status="receiving">待收货</div>
+      <div class="cat-pill" data-status="done">已完成</div>
+      <div class="cat-pill" data-status="cancelled">已取消</div>
+    </div>
+
+    <!-- Orders list -->
+    <div class="stack" style="gap:16px;" id="ordersList"></div>
+
+    <!-- Empty state -->
+    <div class="empty-state hidden" id="emptyOrders">
+      <div class="empty-icon">📦</div>
+      <div class="empty-title">暂无订单</div>
+      <div class="empty-desc">快去选购你喜欢的网球装备吧</div>
+      <a href="products.html" class="btn btn-accent btn-lg">去购物 →</a>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/app.js"></script>
+  <script>
+    // Load orders from localStorage; seed with mock orders if empty
+    var userOrders = TennisPro.getOrders();
+    if (userOrders.length === 0) {
+      userOrders = [
+        {id:'TP20261018001', status:'shipping', items:[
+          {name:'Babolat Pure Aero 网球拍', spec:'300g', qty:1, price:1899},
+          {name:'Dunlop AO 网球(4球装)', spec:'4球装', qty:2, price:89}
+        ], total:2077, date:'2026-10-18 14:32', payMethod:'支付宝'},
+        {id:'TP20261015002', status:'receiving', items:[
+          {name:'Nike Air Zoom Vapor 网球鞋', spec:'42', qty:1, price:1099}
+        ], total:1099, date:'2026-10-15 09:15', payMethod:'微信支付'},
+        {id:'TP20261010003', status:'done', items:[
+          {name:'Wilson Pro Staff RF97 网球拍', spec:'315g', qty:1, price:2299},
+          {name:'Wilson 网球手胶(3条装)', spec:'标准款', qty:3, price:59}
+        ], total:2476, date:'2026-10-10 16:48', payMethod:'支付宝'},
+        {id:'TP20261005004', status:'pending', items:[
+          {name:'Fila 网球Polo衫 男款', spec:'L', qty:2, price:299},
+          {name:'Nike 网球短裤 速干款', spec:'M', qty:1, price:199}
+        ], total:797, date:'2026-10-05 11:20', payMethod:'待支付'},
+        {id:'TP20261001005', status:'cancelled', items:[
+          {name:'Head Speed Pro 网球拍', spec:'285g', qty:1, price:1699}
+        ], total:1699, date:'2026-10-01 08:00', payMethod:'已取消'}
+      ];
+      TennisPro.saveOrders(userOrders);
+    }
+
+    var statusConfig = {
+      pending: {label:'待支付', cls:'badge-pending'},
+      shipping: {label:'待发货', cls:'badge-shipping'},
+      receiving: {label:'待收货', cls:'badge-receiving'},
+      done: {label:'已完成', cls:'badge-done'},
+      cancelled: {label:'已取消', cls:'badge-cancelled'}
+    };
+
+    var currentStatus = 'all';
+
+    // Check URL for status filter
+    var urlParams = new URLSearchParams(window.location.search);
+    var urlStatus = urlParams.get('status');
+    if (urlStatus && statusConfig[urlStatus]) {
+      currentStatus = urlStatus;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set active tab based on URL
+      document.querySelectorAll('#statusTabs .cat-pill').forEach(function(tab) {
+        if (tab.dataset.status === currentStatus) {
+          document.querySelectorAll('#statusTabs .cat-pill').forEach(function(t){t.classList.remove('active');});
+          tab.classList.add('active');
+        }
+        tab.onclick = function() {
+          document.querySelectorAll('#statusTabs .cat-pill').forEach(function(t){t.classList.remove('active');});
+          tab.classList.add('active');
+          currentStatus = tab.dataset.status;
+          renderOrders();
+        };
+      });
+      renderOrders();
+    });
+
+    function renderOrders() {
+      var list = document.getElementById('ordersList');
+      var empty = document.getElementById('emptyOrders');
+      list.innerHTML = '';
+      
+      var filtered = currentStatus === 'all' ? userOrders : userOrders.filter(function(o){return o.status===currentStatus;});
+      
+      if (filtered.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      filtered.forEach(function(order) {
+        var config = statusConfig[order.status];
+        var card = document.createElement('div');
+        card.className = 'card';
+        card.style.padding = 'var(--gap-lg)';
+
+        var html = '<div class="row-between" style="margin-bottom:var(--gap-md);padding-bottom:var(--gap-md);border-bottom:1px solid var(--border);">' +
+          '<div class="row" style="gap:16px;"><span style="font-size:var(--fs-micro);color:var(--muted-2);">订单号：' + order.id + '</span><span style="font-size:var(--fs-micro);color:var(--muted-2);">' + order.date + '</span></div>' +
+          '<span class="badge ' + config.cls + '">' + config.label + '</span>' +
+        '</div>';
+
+        // Items
+        order.items.forEach(function(item) {
+          var cat = TennisPro.PRODUCTS.find(function(p){return p.name===item.name;});
+          var catObj = cat ? TennisPro.CATEGORIES.find(function(c){return c.id===cat.cat;}) : null;
+          html += '<div class="row-between" style="padding:8px 0;">' +
+            '<div class="row" style="gap:12px;align-items:center;">' +
+              '<div class="product-card-img" style="width:48px;height:48px;border-radius:var(--radius);"><span class="ph" style="font-size:20px;">' + (catObj?catObj.icon:'🎾') + '</span></div>' +
+              '<div><div style="font-size:var(--fs-small);font-weight:500;">' + item.name + '</div><div style="font-size:var(--fs-micro);color:var(--muted-2);">规格：' + item.spec + ' × ' + item.qty + '</div></div>' +
+            '</div>' +
+            '<span style="font-size:var(--fs-small);font-weight:600;">¥' + (item.price * item.qty).toFixed(2) + '</span>' +
+          '</div>';
+        });
+
+        // Footer
+        html += '<div class="row-between" style="margin-top:var(--gap-md);padding-top:var(--gap-md);border-top:1px solid var(--border);">' +
+          '<span style="font-size:var(--fs-small);color:var(--muted);">支付方式：' + order.payMethod + '</span>' +
+          '<div class="row" style="gap:8px;align-items:center;">' +
+            '<span style="font-size:var(--fs-small);color:var(--muted);">共' + order.items.length + '件 合计</span>' +
+            '<span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--accent);">¥' + order.total.toFixed(2) + '</span>' +
+          '</div>' +
+        '</div>';
+
+        // Actions
+        html += '<div class="row" style="gap:12px;justify-content:flex-end;margin-top:var(--gap-md);">';
+        if (order.status === 'pending') {
+          html += '<button class="btn btn-outline btn-sm" onclick="cancelOrder(\'' + order.id + '\')">取消订单</button>';
+          html += '<button class="btn btn-accent btn-sm" onclick="payOrder(\'' + order.id + '\')">立即支付</button>';
+        } else if (order.status === 'receiving') {
+          html += '<button class="btn btn-outline btn-sm">查看物流</button>';
+          html += '<button class="btn btn-accent btn-sm" onclick="confirmReceive(\'' + order.id + '\')">确认收货</button>';
+        } else if (order.status === 'shipping') {
+          html += '<button class="btn btn-outline btn-sm">催发货</button>';
+        } else if (order.status === 'done') {
+          html += '<button class="btn btn-outline btn-sm" onclick="rebuyOrder(\'' + order.id + '\')">再次购买</button>';
+        } else if (order.status === 'cancelled') {
+          html += '<button class="btn btn-outline btn-sm" onclick="rebuyOrder(\'' + order.id + '\')">重新下单</button>';
+        }
+        html += '</div>';
+
+        card.innerHTML = html;
+        list.appendChild(card);
+      });
+    }
+
+    function cancelOrder(id) {
+      var order = userOrders.find(function(o){return o.id===id;});
+      if (order) {
+        order.status = 'cancelled';
+        order.payMethod = '已取消';
+        TennisPro.saveOrders(userOrders);
+        renderOrders();
+        TennisPro.showToast('订单已取消');
+      }
+    }
+    function payOrder(id) {
+      var order = userOrders.find(function(o){return o.id===id;});
+      if (order) {
+        sessionStorage.setItem('tennispro_order', JSON.stringify({orderNo:id, total:order.total, items:order.items.length}));
+        window.location.href = 'payment.html';
+      }
+    }
+    function confirmReceive(id) {
+      var order = userOrders.find(function(o){return o.id===id;});
+      if (order) {
+        order.status = 'done';
+        TennisPro.saveOrders(userOrders);
+        renderOrders();
+        TennisPro.showToast('确认收货成功');
+      }
+    }
+    function rebuyOrder(id) {
+      var order = userOrders.find(function(o){return o.id===id;});
+      if (order) {
+        order.items.forEach(function(item) {
+          var product = TennisPro.PRODUCTS.find(function(p){return p.name===item.name;});
+          if (product) {
+            TennisPro.addToCart(product.id, item.qty, item.spec);
+          }
+        });
+        setTimeout(function(){ window.location.href = 'cart.html'; }, 800);
+      }
+    }
+  </script>
+</body>
+</html>

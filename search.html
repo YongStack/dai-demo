@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>搜索结果 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="container" style="padding-top:var(--gap-xl);">
+    <div class="row-between" style="margin-bottom:var(--gap-xl);">
+      <div>
+        <h1 style="font-size:var(--fs-h2);font-weight:400;" id="searchTitle">搜索结果</h1>
+        <p style="color:var(--muted);font-size:var(--fs-small);margin-top:8px;" id="searchSubtitle"></p>
+      </div>
+      <select class="form-input" style="width:auto;padding:8px 16px;" id="sortSelect">
+        <option value="default">默认排序</option>
+        <option value="sales">按销量</option>
+        <option value="price-asc">价格从低到高</option>
+        <option value="price-desc">价格从高到低</option>
+      </select>
+    </div>
+
+    <div class="grid grid-4" id="searchResults"></div>
+
+    <!-- Empty state -->
+    <div class="empty-state hidden" id="emptyState">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">没有找到相关商品</div>
+      <div class="empty-desc">看看这些热门推荐</div>
+    </div>
+
+    <!-- Hot recommendations (shown when empty) -->
+    <div class="hidden" id="hotSection">
+      <h2 style="font-size:var(--fs-h3);font-weight:500;margin-bottom:var(--gap-lg);margin-top:var(--gap-2xl);">热门推荐</h2>
+      <div class="grid grid-4" id="hotProducts"></div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+  <script src="js/app.js"></script>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var query = params.get('q') || '';
+    var currentSort = 'default';
+
+    function searchProducts(q) {
+      if (!q) return [];
+      return TennisPro.PRODUCTS.filter(function(p) {
+        return p.name.toLowerCase().indexOf(q.toLowerCase()) >= 0 ||
+               (TennisPro.CATEGORIES.find(function(c){return c.id===p.cat;})||{}).name.indexOf(q) >= 0;
+      });
+    }
+
+    function sortProducts(list) {
+      var sorted = list.slice();
+      if (currentSort === 'sales') sorted.sort(function(a,b){return b.sales-a.sales;});
+      else if (currentSort === 'price-asc') sorted.sort(function(a,b){return a.price-b.price;});
+      else if (currentSort === 'price-desc') sorted.sort(function(a,b){return b.price-a.price;});
+      return sorted;
+    }
+
+    function createProductCard(p) {
+      var cat = TennisPro.CATEGORIES.find(function(c){return c.id===p.cat;});
+      var a = document.createElement('a');
+      a.href = 'product-detail.html?id=' + p.id;
+      a.className = 'product-card';
+      a.innerHTML = '<div class="product-card-img">' +
+        (p.tag ? '<span class="product-tag">' + p.tag + '</span>' : '') +
+        '<span class="ph">' + (cat?cat.icon:'🎾') + '</span></div>' +
+        '<div class="product-card-body"><div class="product-card-name">' + p.name + '</div>' +
+        '<div class="product-card-price">¥' + p.price + '</div>' +
+        '<div class="product-card-sales">已售 ' + p.sales + (p.stock===0?' · 缺货':'') + '</div></div>';
+      return a;
+    }
+
+    function render() {
+      var results = sortProducts(searchProducts(query));
+      var grid = document.getElementById('searchResults');
+      var empty = document.getElementById('emptyState');
+      var hotSection = document.getElementById('hotSection');
+      grid.innerHTML = '';
+
+      document.getElementById('searchTitle').textContent = query ? '搜索"' + query + '"的结果' : '搜索';
+      document.getElementById('searchSubtitle').textContent = query ? '找到 ' + results.length + ' 件相关商品' : '';
+
+      if (results.length === 0) {
+        empty.classList.remove('hidden');
+        hotSection.classList.remove('hidden');
+        var hotGrid = document.getElementById('hotProducts');
+        hotGrid.innerHTML = '';
+        TennisPro.PRODUCTS.filter(function(p){return p.stock>0;}).sort(function(a,b){return b.sales-a.sales;}).slice(0,4).forEach(function(p) {
+          hotGrid.appendChild(createProductCard(p));
+        });
+      } else {
+        empty.classList.add('hidden');
+        hotSection.classList.add('hidden');
+        results.forEach(function(p){ grid.appendChild(createProductCard(p)); });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('sortSelect').onchange = function() {
+        currentSort = this.value; render();
+      };
+      render();
+    });
+  </script>
+</body>
+</html>

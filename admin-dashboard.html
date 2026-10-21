@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>管理后台 · TennisPro</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-logo">Tennis<span>Pro</span> <span style="font-size:10px;color:var(--muted-2);">Admin</span></div>
+      <a href="admin-dashboard.html" class="admin-nav-item active">📊 <span>数据概览</span></a>
+      <a href="admin-products.html" class="admin-nav-item">🎾 <span>商品管理</span></a>
+      <a href="admin-orders.html" class="admin-nav-item">📦 <span>订单管理</span></a>
+      <a href="index.html" class="admin-nav-item" style="margin-top:auto;">🏠 <span>返回前台</span></a>
+    </div>
+
+    <!-- Main content -->
+    <div class="admin-main">
+      <div class="admin-header">
+        <h1 style="font-size:var(--fs-h2);font-weight:400;">数据概览</h1>
+        <span style="font-size:var(--fs-small);color:var(--muted);">管理员 · admin</span>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="grid grid-4" style="margin-bottom:var(--gap-xl);">
+        <div class="admin-card">
+          <div style="font-size:var(--fs-micro);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">今日订单</div>
+          <div style="font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--accent);">42</div>
+          <div style="font-size:var(--fs-micro);color:var(--success);margin-top:4px;">↑ 12% 较昨日</div>
+        </div>
+        <div class="admin-card">
+          <div style="font-size:var(--fs-micro);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">今日销售额</div>
+          <div style="font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--accent);">¥38,420</div>
+          <div style="font-size:var(--fs-micro);color:var(--success);margin-top:4px;">↑ 8% 较昨日</div>
+        </div>
+        <div class="admin-card">
+          <div style="font-size:var(--fs-micro);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">待发货</div>
+          <div style="font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--warning);">15</div>
+          <div style="font-size:var(--fs-micro);color:var(--muted-2);margin-top:4px;">需尽快处理</div>
+        </div>
+        <div class="admin-card">
+          <div style="font-size:var(--fs-micro);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">在售商品</div>
+          <div style="font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--fg);">14</div>
+          <div style="font-size:var(--fs-micro);color:var(--muted-2);margin-top:4px;">共 6 个分类</div>
+        </div>
+      </div>
+
+      <!-- Recent orders -->
+      <div class="admin-card" style="margin-bottom:var(--gap-lg);">
+        <div class="row-between" style="margin-bottom:var(--gap-lg);">
+          <h3 style="font-size:var(--fs-h4);font-weight:600;">最近订单</h3>
+          <a href="admin-orders.html" class="btn btn-outline btn-sm">查看全部 →</a>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>订单号</th><th>商品</th><th>金额</th><th>状态</th><th>时间</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>TP20261018001</td><td>Babolat Pure Aero 网球拍</td><td>¥2,077</td><td><span class="badge badge-shipping">待发货</span></td><td>10-18 14:32</td></tr>
+            <tr><td>TP20261018002</td><td>Nike Air Zoom Vapor 网球鞋</td><td>¥1,099</td><td><span class="badge badge-pending">待支付</span></td><td>10-18 13:15</td></tr>
+            <tr><td>TP20261017003</td><td>Wilson Pro Staff RF97 网球拍</td><td>¥2,476</td><td><span class="badge badge-receiving">待收货</span></td><td>10-17 16:48</td></tr>
+            <tr><td>TP20261017004</td><td>Dunlop AO 网球(4球装)</td><td>¥89</td><td><span class="badge badge-done">已完成</span></td><td>10-17 10:22</td></tr>
+            <tr><td>TP20261016005</td><td>Fila 网球Polo衫 男款</td><td>¥797</td><td><span class="badge badge-pending">待支付</span></td><td>10-16 11:20</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Top products -->
+      <div class="admin-card">
+        <h3 style="font-size:var(--fs-h4);font-weight:600;margin-bottom:var(--gap-lg);">热销商品 TOP 5</h3>
+        <table class="data-table">
+          <thead>
+            <tr><th>排名</th><th>商品名称</th><th>分类</th><th>销量</th><th>价格</th><th>库存</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Wilson 网球手胶(3条装)</td><td>配件</td><td>4,500</td><td>¥59</td><td>300</td></tr>
+            <tr><td>2</td><td>Tourna 避震器套装</td><td>配件</td><td>3,200</td><td>¥39</td><td>250</td></tr>
+            <tr><td>3</td><td>Yonex 运动护腕(2只装)</td><td>球包/护具</td><td>2,800</td><td>¥69</td><td>100</td></tr>
+            <tr><td>4</td><td>Dunlop AO 网球(4球装)</td><td>网球/球包</td><td>5,200</td><td>¥89</td><td>200</td></tr>
+            <tr><td>5</td><td>Fila 网球Polo衫 男款</td><td>网球服装</td><td>1,500</td><td>¥299</td><td>80</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
